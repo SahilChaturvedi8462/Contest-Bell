@@ -27,7 +27,7 @@ public class UserService {
     public void register(RegisterRequest request){
         try {
             if (userRepository.existsByEmail(request.getEmail())){
-                throw new RuntimeException("Email alredy exists!");
+                throw new RuntimeException("Email already exists!");
             }
 
             String token = UUID.randomUUID().toString();
@@ -55,5 +55,19 @@ public class UserService {
         user.setEmailVerified(true);
         user.setVerificationToken(null);
         userRepository.save(user);
+    }
+
+    public void resendVerificationEmail(String email){
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Account with this email not found! please register first"));
+        if(user.isEmailVerified()){
+            throw new RuntimeException("You are already verified go and log-in!");
+        }
+
+        String newToken = UUID.randomUUID().toString();
+
+        user.setVerificationToken(newToken);
+        userRepository.save(user);
+        emailService.sendVerificationMail(email, newToken);
     }
 }

@@ -3,6 +3,7 @@ package com.contestBell.baba.Controllers;
 import com.contestBell.baba.Dto.RegisterRequest;
 import com.contestBell.baba.Services.UserService;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
+@Slf4j
 public class AuthController {
     @Autowired
     private UserService userService;
@@ -18,8 +20,9 @@ public class AuthController {
     public ResponseEntity<String> registerUser(@Valid @RequestBody RegisterRequest request){
         try{
             userService.register(request);
-            return new ResponseEntity<>("We sent you email please check!", HttpStatus.OK);
+            return new ResponseEntity<>("We sent you email please check!", HttpStatus.CREATED);
         } catch (Exception e) {
+            log.error(e.getMessage());
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
@@ -30,6 +33,18 @@ public class AuthController {
             userService.verifyEmail(token);
             return new ResponseEntity<>("Welcome!", HttpStatus.OK);
         } catch (Exception e) {
+            log.error(e.getMessage());
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<String> resendVerification(@RequestParam String email){
+        try {
+            userService.resendVerificationEmail(email);
+            return new ResponseEntity<>("Please check your email!", HttpStatus.OK);
+        } catch (Exception e) {
+            log.error(e.getMessage());
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
