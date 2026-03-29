@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: baba
+  data:
+    mongodb:
+      uri: ${MONOGDB_URI}
+      database: contestBell
+      auto-index-creation: true
+
+
+  mail:
+    port: 587
+    host: smtp.gmail.com
+    username: ${MAIL}
+    password: ${PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+
+app:
+  base-url: http://localhost:8080
