@@ -1,5 +1,6 @@
 package com.contestBell.baba.Controllers;
 
+import com.contestBell.baba.Dto.LoginRequest;
 import com.contestBell.baba.Dto.RegisterRequest;
 import com.contestBell.baba.Services.UserService;
 import jakarta.validation.Valid;
@@ -17,8 +18,8 @@ public class AuthController {
     private UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@Valid @RequestBody RegisterRequest request){
-        try{
+    public ResponseEntity<String> registerUser(@Valid @RequestBody RegisterRequest request) {
+        try {
             userService.register(request);
             return new ResponseEntity<>("We sent you email please check!", HttpStatus.CREATED);
         } catch (Exception e) {
@@ -28,8 +29,8 @@ public class AuthController {
     }
 
     @GetMapping("/verify")
-    public ResponseEntity<String> verifyEmail(@RequestParam String token){
-        try{
+    public ResponseEntity<String> verifyEmail(@RequestParam String token) {
+        try {
             userService.verifyEmail(token);
             return new ResponseEntity<>("Welcome!", HttpStatus.OK);
         } catch (Exception e) {
@@ -39,10 +40,21 @@ public class AuthController {
     }
 
     @PostMapping("/resend-verification")
-    public ResponseEntity<String> resendVerification(@RequestParam String email){
+    public ResponseEntity<String> resendVerification(@RequestParam String email) {
         try {
             userService.resendVerificationEmail(email);
             return new ResponseEntity<>("Please check your email!", HttpStatus.OK);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@Valid @RequestBody LoginRequest request) {
+        try{
+            String token = userService.login(request);
+            return new ResponseEntity<>(token, HttpStatus.OK);
         } catch (Exception e) {
             log.error(e.getMessage());
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);

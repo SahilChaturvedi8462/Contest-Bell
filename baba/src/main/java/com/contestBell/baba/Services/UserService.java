@@ -1,5 +1,6 @@
 package com.contestBell.baba.Services;
 
+import com.contestBell.baba.Dto.LoginRequest;
 import com.contestBell.baba.Dto.RegisterRequest;
 import com.contestBell.baba.Entity.User;
 import com.contestBell.baba.Repository.UserRepository;
@@ -23,6 +24,9 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtService jwtService;
 
     public void register(RegisterRequest request){
         try {
@@ -69,5 +73,20 @@ public class UserService {
         user.setVerificationToken(newToken);
         userRepository.save(user);
         emailService.sendVerificationMail(email, newToken);
+    }
+
+    public String login(LoginRequest request){
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Invalid Email or Password!"));
+
+        if(!user.isEmailVerified()){
+            throw new RuntimeException("Please verify your email first!");
+        }
+
+        if(!passwordEncoder.matches(request.getPassword(), user.getPassword())){
+            throw new RuntimeException("Invalid email or password! or try forget password!");
+        }
+
+        return jwtService.generateToken(user.getEmail());
     }
 }
