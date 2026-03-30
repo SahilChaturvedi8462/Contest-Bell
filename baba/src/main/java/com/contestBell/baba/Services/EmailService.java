@@ -38,4 +38,27 @@ public class EmailService {
             log.error("failed to send mail", e);
         }
     }
+
+    public void sendPasswordResetMail(String sendTo, String token){
+        try{
+            String link = baseurl + "/auth/reset-password?token=" + token;
+            SimpleMailMessage message = new SimpleMailMessage();
+
+            message.setTo(sendTo);
+            message.setSubject("Reset your ContestBell password");
+            message.setText(
+                    "Hello,\n\n" +
+                            "We received a request to reset your password.\n\n" +
+                            "Click the link below to reset it:\n\n" +
+                            link +
+                            "\n\nThis link expires in 15 minutes.\n\n" +
+                            "If you didn't request this, ignore this email.\n\n" +
+                            "Cheers,\n" +
+                            "Sahil from ContestBell"
+            );
+            javaMailSender.send(message);
+        } catch (Exception e) {
+            log.error("failed to send password reset mail", e);
+        }
+    }
 }

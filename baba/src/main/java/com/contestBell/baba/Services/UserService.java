@@ -1,7 +1,9 @@
 package com.contestBell.baba.Services;
 
+import com.contestBell.baba.Dto.ForgetPasswordRequest;
 import com.contestBell.baba.Dto.LoginRequest;
 import com.contestBell.baba.Dto.RegisterRequest;
+import com.contestBell.baba.Dto.ResetPasswordRequest;
 import com.contestBell.baba.Entity.User;
 import com.contestBell.baba.Repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -88,5 +90,46 @@ public class UserService {
         }
 
         return jwtService.generateToken(user.getEmail());
+    }
+
+    public void forgetPassword(ForgetPasswordRequest request){
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found!"));
+
+
+        if (!user.isEmailVerified()) {
+            throw new RuntimeException("Please verify your email first!");
+        }
+
+        String token = UUID.randomUUID().toString();
+        user.setPasswordResetToken(token);
+        user.setPasswordResetTokenExpiry(LocalDateTime.now().plusMinutes(10));
+        userRepository.save(user);
+        emailService.sendPasswordResetMail(user.getEmail(), token);
+    }
+
+    public void resetPassword(ResetPasswordRequest request){
+        User user = userRepository.findByPasswordResetToken(request.getToken())
+                .orElseThrow(() -> new RuntimeException("User not found!"));
+
+
+        if (!user.isEmailVerified()) {
+            throw new RuntimeException("Please verify your email first!");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setPasswordResetTokenExpiry(null);
+        user.setPasswordResetToken(null);
+        userRepository.save(user);
+    }
+
+    public void validateResetPasswordToken(String token){
+        User user = userRepository.findByPasswordResetToken(token)
+                .orElseThrow(() -> new RuntimeException("User not found!"));
+
+
+        if (user.getPasswordResetTokenExpiry().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Token has expired. Please request a new one!");
+        }
     }
 }

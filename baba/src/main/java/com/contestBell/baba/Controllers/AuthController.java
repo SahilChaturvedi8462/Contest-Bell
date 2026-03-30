@@ -1,7 +1,9 @@
 package com.contestBell.baba.Controllers;
 
+import com.contestBell.baba.Dto.ForgetPasswordRequest;
 import com.contestBell.baba.Dto.LoginRequest;
 import com.contestBell.baba.Dto.RegisterRequest;
+import com.contestBell.baba.Dto.ResetPasswordRequest;
 import com.contestBell.baba.Services.UserService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -57,6 +59,38 @@ public class AuthController {
             return new ResponseEntity<>(token, HttpStatus.OK);
         } catch (Exception e) {
             log.error(e.getMessage());
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/forget-password")
+    public ResponseEntity<String> forgetPassword(@Valid @RequestBody
+                                                     ForgetPasswordRequest request){
+        try {
+            userService.forgetPassword(request);
+            return new ResponseEntity<>("Password reset email sent. Please check your inbox.", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/reset-password")
+    public ResponseEntity<String> validateResetToken(@RequestParam String token) {
+        try {
+            userService.validateResetPasswordToken(token);
+            return new ResponseEntity<>("Token valid. Submit your new password.", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(
+            @Valid @RequestBody ResetPasswordRequest request) {
+        try {
+            userService.resetPassword(request);
+            return new ResponseEntity<>("Password reset successfully!", HttpStatus.OK);
+        } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }

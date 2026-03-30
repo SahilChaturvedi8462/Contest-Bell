@@ -26,5 +26,8 @@ public class User {
     private String password;
     private boolean emailVerified = false;
     private String verificationToken;
+    private String passwordResetToken;
+    private LocalDateTime passwordResetTokenExpiry;
+    private String timezone;
     private LocalDateTime createdAt;
 }
