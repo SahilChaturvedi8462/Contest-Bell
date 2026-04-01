@@ -1,11 +1,18 @@
 package com.contestBell.baba.Services;
 
+import com.contestBell.baba.Entity.Contest;
+import com.contestBell.baba.Entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Service
 @Slf4j
@@ -39,8 +46,8 @@ public class EmailService {
         }
     }
 
-    public void sendPasswordResetMail(String sendTo, String token){
-        try{
+    public void sendPasswordResetMail(String sendTo, String token) {
+        try {
             String link = baseurl + "/auth/reset-password?token=" + token;
             SimpleMailMessage message = new SimpleMailMessage();
 
@@ -59,6 +66,72 @@ public class EmailService {
             javaMailSender.send(message);
         } catch (Exception e) {
             log.error("failed to send password reset mail", e);
+        }
+    }
+
+    public void sendContestNotification(User user
+            , Contest contest, String notificationType) {
+
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(user.getEmail());
+
+            //convert UTC to user local date and time
+            ZoneId userZone = (user.getTimezone() != null)
+                    ? ZoneId.of(user.getTimezone())
+                    : ZoneId.of("Asia/Kolkata");
+            ZonedDateTime userLocalTime = contest.getStartTimeUtc()
+                    .atZone(ZoneOffset.UTC)
+                    .withZoneSameInstant(userZone);
+
+            String formattedTime = userLocalTime.format(
+                    DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a z"));
+
+            String subject;
+            String body;
+
+            if ("DAY_BEFORE".equals(notificationType)) {
+                subject = "🔔 Tomorrow: " + contest.getName();
+                body = "Hey " + user.getName() + "!\n\n" +
+                        "Reminder — this contest is tomorrow!\n\n" +
+                        "📌 " + contest.getName() + "\n" +
+                        "🏆 Platform: " + contest.getPlatform() + "\n" +
+                        "📊 Division: " + contest.getDivision() + "\n" +
+                        "⏰ Starts at: " + formattedTime + "\n" +
+                        "🔗 " + contest.getContestUrl() + "\n\n" +
+                        "Good luck! 💪\n" +
+                        "ContestBell";
+
+            } else if ("HOUR_BEFORE".equals(notificationType)) {
+                subject = "⚡ Starting in 1 hour: " + contest.getName();
+                body = "Hey " + user.getName() + "!\n\n" +
+                        "Contest starts in 1 hour — time to warm up!\n\n" +
+                        "📌 " + contest.getName() + "\n" +
+                        "🏆 Platform: " + contest.getPlatform() + "\n" +
+                        "📊 Division: " + contest.getDivision() + "\n" +
+                        "⏰ Starts at: " + formattedTime + "\n" +
+                        "🔗 " + contest.getContestUrl() + "\n\n" +
+                        "You got this! 🔥\n" +
+                        "ContestBell";
+
+            } else {
+                subject = "🆕 New Contest: " + contest.getName();
+                body = "Hey " + user.getName() + "!\n\n" +
+                        "A new contest has been added!\n\n" +
+                        "📌 " + contest.getName() + "\n" +
+                        "🏆 Platform: " + contest.getPlatform() + "\n" +
+                        "📊 Division: " + contest.getDivision() + "\n" +
+                        "⏰ Starts at: " + formattedTime + "\n" +
+                        "🔗 " + contest.getContestUrl() + "\n\n" +
+                        "ContestBell";
+            }
+
+            message.setSubject(subject);
+            message.setText(body);
+            javaMailSender.send(message);
+        } catch (Exception e) {
+            log.error("failed to send notification", e);
+            throw e;
         }
     }
 }

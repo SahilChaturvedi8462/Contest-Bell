@@ -16,6 +16,9 @@ public class ContestService {
     @Autowired
     private ContestRepository contestRepository;
 
+    @Autowired
+    private NotificationService notificationService;
+
     public int saveIfNotExists(CodeforcesContest cf) {
         String platformId = String.valueOf(cf.getId());
 
@@ -45,6 +48,14 @@ public class ContestService {
                 .build();
 
         contestRepository.save(contest);
+
+        // notify users about new contest
+        notificationService.sendNotification(
+                "NEW_CONTEST",
+                contest.getStartTimeUtc().minusYears(1),
+                contest.getStartTimeUtc().plusYears(1)
+        );
+
         return 1;
     }
 
