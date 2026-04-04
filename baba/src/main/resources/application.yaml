@@ -27,3 +27,7 @@ app:
 jwt:
   secret : ${SECRET}
   expiration : 86400000
+
+clist:
+  api-key: ${CLIST_API}
+  username: ${CLIST_USER}

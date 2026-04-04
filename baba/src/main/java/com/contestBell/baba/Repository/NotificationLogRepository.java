@@ -4,8 +4,8 @@ import com.contestBell.baba.Entity.NotificationLog;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface NotificationLogRepository extends MongoRepository<NotificationLog, String> {
-    boolean existsByUserIdAndContestIdAndNotificationTypeAndStatus(String userId,
-                                                                   String contestId,
-                                                                   String notificationType,
-                                                                   String status);
+    boolean existsByUserIdAndContestPlatformIdAndNotificationTypeAndStatus(String userId,
+                                                                           String contestPlatformId,
+                                                                           String notificationType,
+                                                                           String status);
 }

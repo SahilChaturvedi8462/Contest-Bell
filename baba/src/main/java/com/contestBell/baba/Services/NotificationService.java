@@ -55,9 +55,9 @@ public class NotificationService {
                 }
 
                 //check if already notified
-                boolean alreadyNotified = notificationLogRepository.existsByUserIdAndContestIdAndNotificationTypeAndStatus(
+                boolean alreadyNotified = notificationLogRepository.existsByUserIdAndContestPlatformIdAndNotificationTypeAndStatus(
                         sub.getUserId(),
-                        contest.getId(),
+                        contest.getContestPlatformId(),
                         notificationType,
                         "SENT"
                 );
@@ -79,7 +79,7 @@ public class NotificationService {
                     NotificationLog notificationLog = NotificationLog.builder()
                             .notificationType(notificationType)
                             .userId(sub.getUserId())
-                            .contestId(contest.getId())
+                            .contestPlatformId(contest.getContestPlatformId())
                             .platform(contest.getPlatform())
                             .status("SENT")
                             .sentAt(LocalDateTime.now())
@@ -93,7 +93,7 @@ public class NotificationService {
                     //log failure
                     NotificationLog notificationLog = NotificationLog.builder()
                             .userId(sub.getUserId())
-                            .contestId(contest.getId())
+                            .contestPlatformId(contest.getContestPlatformId())
                             .platform(contest.getPlatform())
                             .status("FAIL")
                             .notificationType(notificationType)

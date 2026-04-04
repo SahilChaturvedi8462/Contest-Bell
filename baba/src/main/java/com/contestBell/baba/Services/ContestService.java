@@ -1,14 +1,18 @@
 package com.contestBell.baba.Services;
 
+import com.contestBell.baba.Dto.ClistContest;
 import com.contestBell.baba.Dto.CodeforcesContest;
 import com.contestBell.baba.Entity.Contest;
 import com.contestBell.baba.Repository.ContestRepository;
+import com.contestBell.baba.Utils.GetDivision;
+import com.contestBell.baba.Utils.PlatformMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 @Service
 @Slf4j
@@ -18,6 +22,12 @@ public class ContestService {
 
     @Autowired
     private NotificationService notificationService;
+
+    @Autowired
+    private PlatformMapper platformMapper;
+
+    @Autowired
+    private GetDivision getDivision;
 
     public int saveIfNotExists(CodeforcesContest cf) {
         String platformId = String.valueOf(cf.getId());
@@ -34,7 +44,7 @@ public class ContestService {
                 ZoneOffset.UTC
         );
 
-        String division = extractDivision(cf.getName());
+        String division = getDivision.extractDivision(cf.getName());
 
         Contest contest = Contest.builder()
                 .name(cf.getName())
@@ -59,14 +69,40 @@ public class ContestService {
         return 1;
     }
 
-    private String extractDivision(String name) {
-        if (name.contains("Div. 1") && name.contains("Div. 2")) return "DIV_1_2";
-        if (name.contains("Div. 1")) return "DIV_1";
-        if (name.contains("Div. 2")) return "DIV_2";
-        if (name.contains("Div. 3")) return "DIV_3";
-        if (name.contains("Div. 4")) return "DIV_4";
-        if (name.contains("Educational")) return "EDUCATIONAL";
-        if (name.contains("Global")) return "GLOBAL";
-        return "OTHER";
+    public int saveIfNotExistsClist(ClistContest cc, String resource){
+        String platformId = "CLIST_" + cc.getId();
+
+        if (contestRepository.existsByContestPlatformId(platformId)) {
+            return 0;
+        }
+
+        LocalDateTime startTime = LocalDateTime.parse(cc.getStart(),
+                DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+
+
+        String platform = platformMapper.getPlatformName(resource);
+        String division = getDivision.extractDivision(cc.getEvent());
+
+        Contest contest = Contest.builder()
+                .name(cc.getEvent())
+                .platform(platform)
+                .division(division)
+                .contestUrl(cc.getHref())
+                .contestPlatformId(platformId)
+                .startTimeUtc(startTime)
+                .durationSeconds((int)cc.getDuration())
+                .phase("BEFORE")
+                .build();
+
+        contestRepository.save(contest);
+        // notify users about new contest
+        notificationService.sendNotification(
+                "NEW_CONTEST",
+                contest.getStartTimeUtc().minusYears(1),
+                contest.getStartTimeUtc().plusYears(1)
+        );
+
+        return 1;
     }
+
 }

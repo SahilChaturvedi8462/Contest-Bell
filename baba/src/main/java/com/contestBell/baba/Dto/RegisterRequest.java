@@ -21,4 +21,5 @@ public class RegisterRequest {
     @NotBlank(message = "Password Required")
     @Size(min = 6, message = "password must be atleas 6 characters long!")
     private String password;
+    private String timeZone;
 }

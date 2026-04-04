@@ -44,6 +44,7 @@ public class UserService {
                     .password(passwordEncoder.encode(request.getPassword()))
                     .emailVerified(false)
                     .verificationToken(token)
+                    .timezone(request.getTimeZone())
                     .createdAt(LocalDateTime.now())
                     .build();
 

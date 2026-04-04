@@ -19,7 +19,7 @@ public class NotificationLog {
     private String id;
 
     private String userId;
-    private String contestId;
+    private String contestPlatformId;
     private String notificationType;
     private String platform;
     private String status;
