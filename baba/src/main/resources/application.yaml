@@ -32,3 +32,8 @@ jwt:
 clist:
   api-key: ${CLIST_API}
   username: ${CLIST_USER}
+
+brevo:
+  api-key: ${BREVO_API_KEY}
+  sender-email: ${MAIL}
+  sender-name: Sahil from ContestBell

@@ -3,83 +3,99 @@ package com.contestBell.baba.Services;
 import com.contestBell.baba.Entity.Contest;
 import com.contestBell.baba.Entity.User;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 @Service
 @Slf4j
 public class EmailService {
-    @Autowired
-    private JavaMailSender javaMailSender;
 
     @Value("${app.base-url}")
     private String baseurl;
 
-    public void sendVerificationMail(String sendTo, String token) {
-        try {
-            String link = baseurl + "/auth/verify?token=" + token;
-            SimpleMailMessage message = new SimpleMailMessage();
+    @Value("${brevo.api-key}")
+    private String brevoApiKey;
 
-            message.setTo(sendTo);
-            message.setSubject("To verify Your CONTEST-BELL account");
-            message.setText(
-                    "Hello,\n\n" +
-                            "Thanks for joining us! We're glad you're here 🎉\n\n" +
-                            "Please verify your email address to activate your account:\n\n" +
-                            link +
-                            "\n\nThis helps us keep your account secure.\n\n" +
-                            "Cheers,\n" +
-                            "Sahil from ContestBell\n\n" +
-                            "\"Hit every contest Harder💪\""
+    @Value("${brevo.sender-email}")
+    private String senderEmail;
+
+    @Value("${brevo.sender-name}")
+    private String senderName;
+
+    private final WebClient webClient = WebClient.builder()
+            .baseUrl("https://api.brevo.com/v3")
+            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .build();
+
+    private void sendEmail(String toEmail, String toName, String subject, String textContent) {
+        try {
+            Map<String, Object> body = Map.of(
+                    "sender", Map.of("email", senderEmail, "name", senderName),
+                    "to", new Object[]{Map.of("email", toEmail, "name", toName)},
+                    "subject", subject,
+                    "textContent", textContent
             );
-            javaMailSender.send(message);
+
+            webClient.post()
+                    .uri("/smtp/email")
+                    .header("api-key", brevoApiKey)
+                    .bodyValue(body)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+
+            log.info("Email sent successfully to {}", toEmail);
+
         } catch (Exception e) {
-            log.error("failed to send mail", e);
+            log.error("Failed to send email to {}: {}", toEmail, e.getMessage());
         }
+    }
+
+    public void sendVerificationMail(String sendTo, String token) {
+        String link = baseurl + "/auth/verify?token=" + token;
+        String text =
+                "Hello,\n\n" +
+                        "Thanks for joining us! We're glad you're here 🎉\n\n" +
+                        "Please verify your email address to activate your account:\n\n" +
+                        link +
+                        "\n\nThis helps us keep your account secure.\n\n" +
+                        "Cheers,\n" +
+                        "Sahil from ContestBell\n\n" +
+                        "\"Hit every contest Harder💪\"";
+
+        sendEmail(sendTo, "User", "To verify Your CONTEST-BELL account", text);
     }
 
     public void sendPasswordResetMail(String sendTo, String token) {
-        try {
-            String link = baseurl + "/auth/reset-password?token=" + token;
-            SimpleMailMessage message = new SimpleMailMessage();
+        String link = baseurl + "/auth/reset-password?token=" + token;
+        String text =
+                "Hello,\n\n" +
+                        "We received a request to reset your password.\n\n" +
+                        "Click the link below to reset it:\n\n" +
+                        link +
+                        "\n\nThis link expires in 15 minutes.\n\n" +
+                        "If you didn't request this, ignore this email.\n\n" +
+                        "Cheers,\n" +
+                        "Sahil from ContestBell";
 
-            message.setTo(sendTo);
-            message.setSubject("Reset your ContestBell password");
-            message.setText(
-                    "Hello,\n\n" +
-                            "We received a request to reset your password.\n\n" +
-                            "Click the link below to reset it:\n\n" +
-                            link +
-                            "\n\nThis link expires in 15 minutes.\n\n" +
-                            "If you didn't request this, ignore this email.\n\n" +
-                            "Cheers,\n" +
-                            "Sahil from ContestBell"
-            );
-            javaMailSender.send(message);
-        } catch (Exception e) {
-            log.error("failed to send password reset mail", e);
-        }
+        sendEmail(sendTo, "User", "Reset your ContestBell password", text);
     }
 
-    public void sendContestNotification(User user
-            , Contest contest, String notificationType) {
-
+    public void sendContestNotification(User user, Contest contest, String notificationType) {
         try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setTo(user.getEmail());
-
-            //convert UTC to user local date and time
             ZoneId userZone = (user.getTimezone() != null)
                     ? ZoneId.of(user.getTimezone())
                     : ZoneId.of("Asia/Kolkata");
+
             ZonedDateTime userLocalTime = contest.getStartTimeUtc()
                     .atZone(ZoneOffset.UTC)
                     .withZoneSameInstant(userZone);
@@ -126,11 +142,10 @@ public class EmailService {
                         "ContestBell";
             }
 
-            message.setSubject(subject);
-            message.setText(body);
-            javaMailSender.send(message);
+            sendEmail(user.getEmail(), user.getName(), subject, body);
+
         } catch (Exception e) {
-            log.error("failed to send notification", e);
+            log.error("Failed to send notification", e);
             throw e;
         }
     }
