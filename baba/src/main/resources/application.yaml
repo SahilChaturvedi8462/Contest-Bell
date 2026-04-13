@@ -22,7 +22,8 @@ spring:
 
 
 app:
-  base-url: http://localhost:8080
+  base-url: ${BASE_URL}
+  frontend-url: ${FRONTEND_URL}
 
 jwt:
   secret : ${SECRET}
@@ -31,3 +32,4 @@ jwt:
 clist:
   api-key: ${CLIST_API}
   username: ${CLIST_USER}
+

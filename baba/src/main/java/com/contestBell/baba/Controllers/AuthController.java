@@ -8,9 +8,12 @@ import com.contestBell.baba.Services.UserService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
 
 @RestController
 @RequestMapping("/auth")
@@ -18,6 +21,10 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     @Autowired
     private UserService userService;
+
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
+
 
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@Valid @RequestBody RegisterRequest request) {
@@ -34,10 +41,14 @@ public class AuthController {
     public ResponseEntity<String> verifyEmail(@RequestParam String token) {
         try {
             userService.verifyEmail(token);
-            return new ResponseEntity<>("Welcome!", HttpStatus.OK);
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .location(URI.create(frontendUrl + "/login.html?verified=true"))
+                    .build();
         } catch (Exception e) {
             log.error(e.getMessage());
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .location(URI.create(frontendUrl + "/login.html?error=invalid-token"))
+                    .build();
         }
     }
 
@@ -78,9 +89,13 @@ public class AuthController {
     public ResponseEntity<String> validateResetToken(@RequestParam String token) {
         try {
             userService.validateResetPasswordToken(token);
-            return new ResponseEntity<>("Token valid. Submit your new password.", HttpStatus.OK);
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .location(URI.create(frontendUrl + "/reset-password.html?token=" + token))
+                    .build();
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .location(URI.create(frontendUrl + "/forgot-password.html?error=invalid-token"))
+                    .build();
         }
     }
 
