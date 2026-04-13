@@ -9,17 +9,17 @@ spring:
 
 
   mail:
-    port: 465
-    host: smtp.gmail.com
+    host: smtp-relay.brevo.com
+    port: 587
     username: ${MAIL}
     password: ${PASSWORD}
     properties:
       mail:
         smtp:
           auth: true
-          ssl:
-            enable: true
           starttls:
+            enable: true
+          ssl:
             enable: false
 
 
