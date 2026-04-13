@@ -7,7 +7,6 @@ spring:
       database: contestBell
       auto-index-creation: true
 
-
   mail:
     host: smtp-relay.brevo.com
     port: 587
@@ -22,16 +21,14 @@ spring:
           ssl:
             enable: false
 
-
 app:
   base-url: ${BASE_URL}
   frontend-url: ${FRONTEND_URL}
 
 jwt:
-  secret : ${SECRET}
-  expiration : 86400000
+  secret: ${SECRET}
+  expiration: 86400000
 
 clist:
   api-key: ${CLIST_API}
   username: ${CLIST_USER}
-
