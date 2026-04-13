@@ -9,7 +9,7 @@ spring:
 
 
   mail:
-    port: 587
+    port: 465
     host: smtp.gmail.com
     username: ${MAIL}
     password: ${PASSWORD}
@@ -17,8 +17,10 @@ spring:
       mail:
         smtp:
           auth: true
-          starttls:
+          ssl:
             enable: true
+          starttls:
+            enable: false
 
 
 app:
