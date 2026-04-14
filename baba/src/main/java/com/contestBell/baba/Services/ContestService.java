@@ -77,7 +77,9 @@ public class ContestService {
         }
 
         LocalDateTime startTime = LocalDateTime.parse(cc.getStart(),
-                DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+                        DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                .atOffset(ZoneOffset.UTC)
+                .toLocalDateTime();
 
 
         String platform = platformMapper.getPlatformName(resource);
