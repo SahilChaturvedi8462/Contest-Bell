@@ -17,7 +17,7 @@ public class CodeforcesService {
     private ContestService contestService;
 
     private static final String CODEFORCES_API =
-            "https://codeforces.com/api/contest.list";
+            "https://codeforces.com/api/contest.list?gym=false";
 
     public void fetchAndSave(){
         try{
