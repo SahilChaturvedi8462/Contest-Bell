@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -22,8 +23,20 @@ public class SubscriptionService {
     private UserRepository userRepository;
 
     public void subscribe(String userId, SubscriptionRequest request){
-        if (subscriptionRepository.existsByUserIdAndPlatform(userId, request.getPlatform())){
-            throw new RuntimeException("Already Subscribed to "+ request.getPlatform());
+        Optional<Subscription> existing = subscriptionRepository.findByUserIdAndPlatform(userId, request.getPlatform());
+
+        if(existing.isPresent()){
+            Subscription subscription = existing.get();
+
+            if(subscription.isActive()){
+                throw new RuntimeException("Already subscribed to"
+                + request.getPlatform());
+            }
+
+            subscription.setActive(true);
+            subscription.setDivisions(request.getDivisions());
+            subscriptionRepository.save(subscription);
+            return;
         }
 
         Subscription subscription = Subscription.builder()
