@@ -30,32 +30,29 @@ public class UserService {
     @Autowired
     private JwtService jwtService;
 
-    public void register(RegisterRequest request){
-        try {
-            if (userRepository.existsByEmail(request.getEmail())){
-                throw new RuntimeException("Email already exists!");
-            }
-
-            String token = UUID.randomUUID().toString();
-
-            User user = User.builder()
-                    .name(request.getName())
-                    .email(request.getEmail())
-                    .password(passwordEncoder.encode(request.getPassword()))
-                    .emailVerified(false)
-                    .verificationToken(token)
-                    .timezone(request.getTimeZone())
-                    .createdAt(LocalDateTime.now())
-                    .build();
-
-            userRepository.save(user);
-            emailService.sendVerificationMail(request.getEmail(), token);
-        } catch (Exception e) {
-            log.error("failed to register", e);
+    public void register(RegisterRequest request) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email already exists!");
         }
+
+        String token = UUID.randomUUID().toString();
+
+        User user = User.builder()
+                .name(request.getName())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .emailVerified(false)
+                .verificationToken(token)
+                .timezone(request.getTimeZone())
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        userRepository.save(user);
+        emailService.sendVerificationMail(request.getEmail(), token);
+
     }
 
-    public void verifyEmail(String token){
+    public void verifyEmail(String token) {
         User user = userRepository.findByVerificationToken(token)
                 .orElseThrow(() -> new RuntimeException("invalid Token!"));
 
@@ -64,10 +61,10 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void resendVerificationEmail(String email){
+    public void resendVerificationEmail(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Account with this email not found! please register first"));
-        if(user.isEmailVerified()){
+        if (user.isEmailVerified()) {
             throw new RuntimeException("You are already verified go and log-in!");
         }
 
@@ -78,22 +75,22 @@ public class UserService {
         emailService.sendVerificationMail(email, newToken);
     }
 
-    public String login(LoginRequest request){
+    public String login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Invalid Email or Password!"));
 
-        if(!user.isEmailVerified()){
+        if (!user.isEmailVerified()) {
             throw new RuntimeException("Please verify your email first!");
         }
 
-        if(!passwordEncoder.matches(request.getPassword(), user.getPassword())){
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("Invalid email or password! or try forget password!");
         }
 
         return jwtService.generateToken(user.getEmail());
     }
 
-    public void forgetPassword(ForgetPasswordRequest request){
+    public void forgetPassword(ForgetPasswordRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found!"));
 
@@ -109,7 +106,7 @@ public class UserService {
         emailService.sendPasswordResetMail(user.getEmail(), token);
     }
 
-    public void resetPassword(ResetPasswordRequest request){
+    public void resetPassword(ResetPasswordRequest request) {
         User user = userRepository.findByPasswordResetToken(request.getToken())
                 .orElseThrow(() -> new RuntimeException("User not found!"));
 
@@ -124,7 +121,7 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void validateResetPasswordToken(String token){
+    public void validateResetPasswordToken(String token) {
         User user = userRepository.findByPasswordResetToken(token)
                 .orElseThrow(() -> new RuntimeException("User not found!"));
 
