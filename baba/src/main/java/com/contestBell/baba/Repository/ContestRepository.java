@@ -13,4 +13,5 @@ public interface ContestRepository extends MongoRepository<Contest, String> {
     List<Contest> findByPhaseNotAndStartTimeUtcAfter(
             String phase, LocalDateTime after);
     List<Contest> findByPhaseAndStartTimeUtcBefore(String phase, LocalDateTime before);
+    List<Contest> findByStartTimeUtcBefore(LocalDateTime before);
 }

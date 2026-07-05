@@ -1,7 +1,9 @@
 package com.contestBell.baba.Scedulers;
 
 import com.contestBell.baba.Entity.Contest;
+import com.contestBell.baba.Entity.NotificationLog;
 import com.contestBell.baba.Repository.ContestRepository;
+import com.contestBell.baba.Repository.NotificationLogRepository;
 import com.contestBell.baba.Services.ClistService;
 import com.contestBell.baba.Services.CodeforcesService;
 import lombok.extern.slf4j.Slf4j;
@@ -25,9 +27,12 @@ public class FetchContests {
     @Autowired
     private ContestRepository contestRepository;
 
+    @Autowired
+    private NotificationLogRepository notificationLogRepository;
+
     //every 3 hours
     @Scheduled(fixedRate = 3 * 60 * 60 * 1000, initialDelay = 0)
-    public void fetchCodeforces(){
+    public void fetchCodeforces() {
         log.info("Scheduler triggered- fetching contests..");
         codeforcesService.fetchAndSave();
     }
@@ -41,12 +46,38 @@ public class FetchContests {
         clistService.fetchAndSave("hackerrank.com");
     }
 
-    @Scheduled(cron = "0 0 2 * * *") // runs at 2 AM every day
-    public void cleanupFinishedContests() {
+//    @Scheduled(cron = "0 0 2 * * *") // runs at 2 AM every day
+//    public void cleanupFinishedContests() {
+//        LocalDateTime threeDaysAgo = LocalDateTime.now(ZoneOffset.UTC).minusDays(3);
+//        List<Contest> old = contestRepository
+//                .findByPhaseAndStartTimeUtcBefore("FINISHED", threeDaysAgo);
+//        contestRepository.deleteAll(old);
+//        log.info("Cleaned up {} old contests", old.size());
+//    }
+
+    //cleaing old notification logs
+    @Scheduled(cron = "0 0 3 * * *")
+    public void cleanUpOldNotificationLog() {
+        //find contest ended before 3 days
         LocalDateTime threeDaysAgo = LocalDateTime.now(ZoneOffset.UTC).minusDays(3);
-        List<Contest> old = contestRepository
-                .findByPhaseAndStartTimeUtcBefore("FINISHED", threeDaysAgo);
-        contestRepository.deleteAll(old);
-        log.info("Cleaned up {} old contests", old.size());
+
+        List<Contest> oldContest = contestRepository
+                .findByStartTimeUtcBefore(threeDaysAgo);
+
+        if (oldContest.isEmpty()) {
+            log.info("No old notification log to cleanUp");
+            return;
+        }
+
+        //get thire platform id's
+        List<String> oldPlatformIds = oldContest.stream()
+                .map(Contest::getContestPlatformId)
+                .toList();
+
+        //delete thire logs
+        List<NotificationLog> oldLogs = notificationLogRepository.findByContestPlatformIdIn(oldPlatformIds);
+
+        notificationLogRepository.deleteAll(oldLogs);
+        log.info("clean up {} old notification logs", oldLogs.size());
     }
 }
