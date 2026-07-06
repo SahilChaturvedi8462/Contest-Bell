@@ -46,15 +46,6 @@ public class FetchContests {
         clistService.fetchAndSave("hackerrank.com");
     }
 
-//    @Scheduled(cron = "0 0 2 * * *") // runs at 2 AM every day
-//    public void cleanupFinishedContests() {
-//        LocalDateTime threeDaysAgo = LocalDateTime.now(ZoneOffset.UTC).minusDays(3);
-//        List<Contest> old = contestRepository
-//                .findByPhaseAndStartTimeUtcBefore("FINISHED", threeDaysAgo);
-//        contestRepository.deleteAll(old);
-//        log.info("Cleaned up {} old contests", old.size());
-//    }
-
     //cleaing old notification logs
     @Scheduled(cron = "0 0 3 * * *")
     public void cleanUpOldNotificationLog() {
@@ -62,7 +53,7 @@ public class FetchContests {
         LocalDateTime threeDaysAgo = LocalDateTime.now(ZoneOffset.UTC).minusDays(3);
 
         List<Contest> oldContest = contestRepository
-                .findByStartTimeUtcBefore(threeDaysAgo);
+                .findByStartTimeUtcBefore(threeDaysAgo); 
 
         if (oldContest.isEmpty()) {
             log.info("No old notification log to cleanUp");
@@ -79,5 +70,9 @@ public class FetchContests {
 
         notificationLogRepository.deleteAll(oldLogs);
         log.info("clean up {} old notification logs", oldLogs.size());
+
+        // then delete contests
+        contestRepository.deleteAll(oldContest);
+        log.info("Cleaned up {} old contests", oldContest.size());
     }
 }
