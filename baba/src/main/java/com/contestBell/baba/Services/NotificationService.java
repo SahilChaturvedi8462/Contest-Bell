@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 @Service
@@ -41,6 +42,11 @@ public class NotificationService {
         List<Contest> contests = contestRepository.findByStartTimeUtcBetween(from, to);
 
         for (Contest contest : contests){
+
+            // skip already started contests
+            if (contest.getStartTimeUtc().isBefore(LocalDateTime.now(ZoneOffset.UTC))) {
+                continue;
+            }
 
             //find active subscription for this platform
             List<Subscription> subscriptions = subscriptionRepository.findByPlatformAndActiveTrue(

@@ -24,6 +24,7 @@ spring:
 app:
   base-url: ${BASE_URL}
   frontend-url: ${FRONTEND_URL}
+  admin-secret: ${ADMIN_SECRET}
 
 jwt:
   secret: ${SECRET}

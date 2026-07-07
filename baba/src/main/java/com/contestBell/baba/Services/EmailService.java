@@ -149,4 +149,10 @@ public class EmailService {
             throw e;
         }
     }
+
+    public void sendBroadCastMail(String to, String name,
+                                  String subject, String message){
+        String text = "Hey " + name + "!\n\n" + message + "\n\n-ContestBell";
+        sendEmail(to, name, subject, text);
+    }
 }
