@@ -30,4 +30,7 @@ public class User {
     private LocalDateTime passwordResetTokenExpiry;
     private String timezone;
     private LocalDateTime createdAt;
+    private String googleAccessToken;
+    private String googleRefreshToken;
+    private boolean calendarConnected = true;
 }
