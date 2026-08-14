@@ -32,5 +32,5 @@ public class User {
     private LocalDateTime createdAt;
     private String googleAccessToken;
     private String googleRefreshToken;
-    private boolean calendarConnected = true;
+    private boolean calendarConnected = false;
 }

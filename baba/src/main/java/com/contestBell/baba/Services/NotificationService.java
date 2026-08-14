@@ -33,6 +33,9 @@ public class NotificationService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private GoogleCalendarService googleCalendarService;
+
     public void sendNotification(String notificationType,
                                  LocalDateTime from,
                                  LocalDateTime to){
@@ -74,6 +77,11 @@ public class NotificationService {
                     emailService.sendContestNotification(
                             user, contest, notificationType
                     );
+
+                    //add to google clender if new contest
+                    if("NEW_CONTEST".equals(notificationType) && user.isCalendarConnected()){
+                        googleCalendarService.createCalenderEvent(user, contest);
+                    }
 
                     //log success
                     NotificationLog notificationLog = NotificationLog.builder()
