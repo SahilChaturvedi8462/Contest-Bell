@@ -29,4 +29,4 @@ Codeforces, CodeChef, LeetCode, AtCoder and more.
 ## 👨‍💻 Author
 **Sahil Chaturvedi**
 - GitHub — [SahilChaturvedi8462](https://github.com/SahilChaturvedi8462)
-- Live — [contestbell.netlify.app](https://contestbell.netlify.app)
+- Live — [contestbell.netlify.app](https://contestbell.xyz)
