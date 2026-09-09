@@ -14,4 +14,5 @@ public class UserProfileResponse {
     private String timeZone;
     private boolean emailVerified;
     private LocalDateTime createdAt;
+    private boolean calenderConnected;
 }

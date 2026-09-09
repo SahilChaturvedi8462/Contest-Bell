@@ -99,7 +99,7 @@ public class GoogleCalendarService {
     }
 
     //service to get new access token by refresh token
-    public String refreshAccessToken(User user) throws Exception{
+    public String refreshAccessToken(User user) throws Exception {
         String tokenUrl = "https://oauth2.googleapis.com/token";
         RestTemplate restTemplate = new RestTemplate();
 
@@ -126,6 +126,7 @@ public class GoogleCalendarService {
 
         return newAccessToken;
     }
+
     //service to create event in calendar of user
     public void createCalenderEvent(User user, Contest contest) {
         log.info("Attempting calendar event for user {} connected={}",
@@ -180,7 +181,7 @@ public class GoogleCalendarService {
         }
     }
 
-    public void tryCreateEvent(User user, Map<String, Object> event) throws Exception{
+    public void tryCreateEvent(User user, Map<String, Object> event) throws Exception {
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
@@ -189,13 +190,13 @@ public class GoogleCalendarService {
 
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(event, headers);
 
-        try{
+        try {
             restTemplate.postForEntity(CALENDAR_API, request, Map.class);
             log.info("Calender event created for user {}", user.getEmail());
         } catch (HttpClientErrorException.Unauthorized e) {
             //token expired try getting new token and retry
             log.info("Token expired for user {} - refreshing", user.getEmail());
-            try{
+            try {
                 String newToken = refreshAccessToken(user);
                 headers.setBearerAuth(newToken);
                 HttpEntity<Map<String, Object>> retryRequest =
@@ -203,13 +204,13 @@ public class GoogleCalendarService {
                 restTemplate.postForEntity(CALENDAR_API, retryRequest, Map.class);
                 log.info("Calender event created after token refresh for user {}", user.getEmail());
 
-            }catch(Exception refreshException){
+            } catch (Exception refreshException) {
                 //if refresh token is invalid mark as disconnected
-                log.error("Refresh token invalid for user {} - marking as disconnected");
-                user.getEmail();
+                log.error("Refresh token invalid for user {} - marking as disconnected",
+                        user.getEmail());
                 user.setCalendarConnected(false);
                 user.setGoogleAccessToken(null);
-                user.setGoogleAccessToken(null);
+                user.setGoogleRefreshToken(null);
                 userRepository.save(user);
             }
         }

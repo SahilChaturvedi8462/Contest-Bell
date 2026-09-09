@@ -38,6 +38,7 @@ public class UserController {
                     .timeZone(user.getTimezone())
                     .emailVerified(user.isEmailVerified())
                     .createdAt(user.getCreatedAt())
+                    .calenderConnected(user.isCalendarConnected())
                     .build();
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {

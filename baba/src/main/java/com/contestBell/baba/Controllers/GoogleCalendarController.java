@@ -6,11 +6,13 @@ import com.contestBell.baba.Repository.UserRepository;
 import com.contestBell.baba.Services.GoogleCalendarService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
@@ -18,6 +20,9 @@ import java.time.ZoneOffset;
 @RequestMapping("/api/calendar")
 @Slf4j
 public class GoogleCalendarController {
+    @Value("${app.frontend-url}")
+    private String frontendUrl;
+
     @Autowired
     private GoogleCalendarService googleCalendarService;
 
@@ -57,7 +62,10 @@ public class GoogleCalendarController {
             @RequestParam String state) {
         try{
             googleCalendarService.handleCallBack(code, state);
-            return new ResponseEntity<>("Google Calender Connected successfully!", HttpStatus.OK);
+            return ResponseEntity
+                    .status(HttpStatus.FOUND)
+                    .location(URI.create(frontendUrl + "/index.html?calendar=connected"))
+                    .build();
         } catch (Exception e) {
             log.error("Oauth callback failed!", e);
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
