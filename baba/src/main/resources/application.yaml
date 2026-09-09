@@ -28,7 +28,7 @@ app:
 
 jwt:
   secret: ${SECRET}
-  expiration: 86400000
+  expiration: 604800000
 
 clist:
   api-key: ${CLIST_API}
@@ -42,4 +42,4 @@ brevo:
 google:
   client-id: ${CLIENT_ID}
   client-secret: ${CLIENT_SECRET}
-  redirect-uri: http://localhost:8080/api/calendar/oauth/callback
+  redirect-uri: ${GOOGLE_REDIRECT_URI}
