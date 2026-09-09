@@ -38,3 +38,8 @@ brevo:
   api-key: ${BREVO_API_KEY}
   sender-email: ${MAIL}
   sender-name: Sahil from ContestBell
+
+google:
+  client-id: ${CLIENT_ID}
+  client-secret: ${CLIENT_SECRET}
+  redirect-uri: http://localhost:8080/api/calendar/oauth/callback

@@ -36,6 +36,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/test/**").permitAll()
                         .requestMatchers("/admin/**").permitAll()
+                        .requestMatchers("/api/calendar/oauth/callback").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
