@@ -40,6 +40,9 @@ public class GoogleCalendarService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private EmailService emailService;
+
     private static final String SCOPES =
             "https://www.googleapis.com/auth/calendar.events" +
                     "+https://www.googleapis.com/auth/userinfo.email" +
@@ -212,6 +215,8 @@ public class GoogleCalendarService {
                 user.setGoogleAccessToken(null);
                 user.setGoogleRefreshToken(null);
                 userRepository.save(user);
+
+                emailService.sendCalenderDisconnectedEmail(user.getEmail(), user.getName());
             }
         }
     }

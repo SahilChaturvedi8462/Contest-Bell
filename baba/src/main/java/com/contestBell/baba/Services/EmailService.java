@@ -155,4 +155,20 @@ public class EmailService {
         String text = "Hey " + name + "!\n\n" + message + "\n\n-ContestBell";
         sendEmail(to, name, subject, text);
     }
+
+    public void sendCalenderDisconnectedEmail(String to, String name){
+        String subject = "🥀Reconnect your Google Calendar — ContestBell";
+        String text =
+                "Hey " + name + ",\n\n" +
+                        "Your Google Calendar connection with ContestBell is no longer active.\n\n" +
+                        "This means ContestBell can no longer automatically add upcoming contests " +
+                        "to your Google Calendar.\n\n" +
+                        "To continue using Google Calendar integration, please reconnect your " +
+                        "Google Calendar from your ContestBell profile.\n\n" +
+                        "👉 Log in to ContestBell and reconnect your Google Calendar.\n\n" +
+                        "Your ContestBell contest notifications will continue to work normally.\n\n" +
+                        "Happy coding! 🚀\n\n" +
+                        "— ContestBell";
+        sendEmail(to, name, subject, text);
+    }
 }
